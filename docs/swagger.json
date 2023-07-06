@@ -1,0 +1,143 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is a sample server",
+        "title": "Example API",
+        "termsOfService": "http://swagger.io/terms/",
+        "contact": {
+            "name": "Michel La Guardia",
+            "url": "https://www.github.com/castmetal",
+            "email": "mlaguardia@gmail.com"
+        },
+        "license": {
+            "name": "Apache 2.0",
+            "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+        },
+        "version": "1.0"
+    },
+    "host": "http://localhost:8088",
+    "paths": {
+        "/v1/client": {
+            "post": {
+                "description": "Creating a client with route permissions",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Clients"
+                ],
+                "summary": "Create a client on args input",
+                "parameters": [
+                    {
+                        "description": "CreateClient Data",
+                        "name": "createClient",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateClientDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.CreateClientResponseDTO"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "dtos.CreateClientDTO": {
+            "type": "object",
+            "required": [
+                "client_name",
+                "key_period",
+                "key_time_duration",
+                "scope_name"
+            ],
+            "properties": {
+                "client_name": {
+                    "type": "string",
+                    "minLength": 2
+                },
+                "id": {
+                    "type": "string"
+                },
+                "key_period": {
+                    "type": "string",
+                    "minLength": 2
+                },
+                "key_time_duration": {
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.Permission"
+                    }
+                },
+                "scope_name": {
+                    "type": "string",
+                    "minLength": 2
+                }
+            }
+        },
+        "dtos.CreateClientResponseDTO": {
+            "type": "object",
+            "properties": {
+                "api_id": {
+                    "type": "string"
+                },
+                "client_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "string"
+                },
+                "key_period": {
+                    "type": "string"
+                },
+                "key_time_duration": {
+                    "type": "integer"
+                },
+                "permissions": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/dtos.Permission"
+                    }
+                },
+                "scope_id": {
+                    "type": "string"
+                },
+                "scope_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.Permission": {
+            "type": "object",
+            "properties": {
+                "resource_method": {
+                    "type": "string"
+                },
+                "resource_name": {
+                    "type": "string"
+                },
+                "resource_path": {
+                    "type": "string"
+                }
+            }
+        }
+    },
+    "externalDocs": {
+        "description": "OpenAPI",
+        "url": "https://swagger.io/resources/open-api/"
+    }
+}
