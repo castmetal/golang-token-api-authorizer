@@ -17,7 +17,6 @@ type (
 	}
 
 	CreateClientDTO struct {
-		ID              string       `json:"id"`
 		ClientName      string       `json:"client_name" validate:"required,min=2"`
 		ScopeName       string       `json:"scope_name" validate:"required,min=2"`
 		Permissions     []Permission `json:"permissions"`

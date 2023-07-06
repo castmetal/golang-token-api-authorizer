@@ -2,7 +2,7 @@
     "swagger": "2.0",
     "info": {
         "description": "This is a sample server",
-        "title": "Example API",
+        "title": "Token Example API",
         "termsOfService": "http://swagger.io/terms/",
         "contact": {
             "name": "Michel La Guardia",
@@ -29,7 +29,7 @@
                 "tags": [
                     "Clients"
                 ],
-                "summary": "Create a client on args input",
+                "summary": "Create a client with CreateClient Data input",
                 "parameters": [
                     {
                         "description": "CreateClient Data",
@@ -65,9 +65,6 @@
                 "client_name": {
                     "type": "string",
                     "minLength": 2
-                },
-                "id": {
-                    "type": "string"
                 },
                 "key_period": {
                     "type": "string",

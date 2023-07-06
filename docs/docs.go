@@ -37,7 +37,7 @@ const docTemplate = `{
                 "tags": [
                     "Clients"
                 ],
-                "summary": "Create a client on args input",
+                "summary": "Create a client with CreateClient Data input",
                 "parameters": [
                     {
                         "description": "CreateClient Data",
@@ -73,9 +73,6 @@ const docTemplate = `{
                 "client_name": {
                     "type": "string",
                     "minLength": 2
-                },
-                "id": {
-                    "type": "string"
                 },
                 "key_period": {
                     "type": "string",
@@ -156,7 +153,7 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "http://localhost:8088",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "Example API",
+	Title:            "Token Example API",
 	Description:      "This is a sample server",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,

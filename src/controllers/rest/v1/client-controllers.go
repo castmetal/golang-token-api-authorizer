@@ -16,7 +16,7 @@ import (
 
 // CreateClient  godoc
 //
-// @Summary  Create a client on args input
+// @Summary  Create a client with CreateClient Data input
 // @Description Creating a client with route permissions
 // @Tags   Clients
 // @Accept   json

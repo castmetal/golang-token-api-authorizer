@@ -4,8 +4,6 @@ definitions:
       client_name:
         minLength: 2
         type: string
-      id:
-        type: string
       key_period:
         minLength: 2
         type: string
@@ -69,7 +67,7 @@ info:
     name: Apache 2.0
     url: http://www.apache.org/licenses/LICENSE-2.0.html
   termsOfService: http://swagger.io/terms/
-  title: Example API
+  title: Token Example API
   version: "1.0"
 paths:
   /v1/client:
@@ -91,7 +89,7 @@ paths:
           description: OK
           schema:
             $ref: '#/definitions/dtos.CreateClientResponseDTO'
-      summary: Create a client on args input
+      summary: Create a client with CreateClient Data input
       tags:
       - Clients
 swagger: "2.0"
