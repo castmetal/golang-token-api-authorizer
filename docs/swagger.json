@@ -50,9 +50,117 @@
                     }
                 }
             }
+        },
+        "/v1/token/access": {
+            "post": {
+                "description": "Allow access to a specific route",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Token"
+                ],
+                "summary": "Concede access to a route",
+                "parameters": [
+                    {
+                        "description": "Generate Token Data",
+                        "name": "allowToken",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AllowAccessTokenDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.AllowAccessTokenResponseDTO"
+                        }
+                    }
+                }
+            }
+        },
+        "/v1/token/generate": {
+            "post": {
+                "description": "Generates a new JWT token to access and authorize requesting for routes",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Token"
+                ],
+                "summary": "Generate a JWT token with Generate Token input",
+                "parameters": [
+                    {
+                        "description": "Generate Token Data",
+                        "name": "generateToken",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dtos.GenerateTokenDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dtos.GenerateTokenResponseDTO"
+                        }
+                    }
+                }
+            }
         }
     },
     "definitions": {
+        "dtos.AllowAccessTokenDTO": {
+            "type": "object",
+            "required": [
+                "api_id",
+                "client_id",
+                "resource_method",
+                "resource_path",
+                "token"
+            ],
+            "properties": {
+                "api_id": {
+                    "type": "string",
+                    "minLength": 2
+                },
+                "client_id": {
+                    "type": "string",
+                    "minLength": 2
+                },
+                "resource_method": {
+                    "type": "string",
+                    "minLength": 2
+                },
+                "resource_path": {
+                    "type": "string",
+                    "minLength": 2
+                },
+                "token": {
+                    "type": "string",
+                    "minLength": 2
+                }
+            }
+        },
+        "dtos.AllowAccessTokenResponseDTO": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
         "dtos.CreateClientDTO": {
             "type": "object",
             "required": [
@@ -114,6 +222,31 @@
                     "type": "string"
                 },
                 "scope_name": {
+                    "type": "string"
+                }
+            }
+        },
+        "dtos.GenerateTokenDTO": {
+            "type": "object",
+            "required": [
+                "api_id",
+                "client_id"
+            ],
+            "properties": {
+                "api_id": {
+                    "type": "string",
+                    "minLength": 2
+                },
+                "client_id": {
+                    "type": "string",
+                    "minLength": 2
+                }
+            }
+        },
+        "dtos.GenerateTokenResponseDTO": {
+            "type": "object",
+            "properties": {
+                "token": {
                     "type": "string"
                 }
             }

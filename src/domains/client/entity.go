@@ -101,6 +101,10 @@ func NewClientEntity(props ClientProps) (*Client, error) {
 	return client, nil
 }
 
+func (c *Client) GetClientHashKey() string {
+	return GetHashKey(c.ApiId, c.ID.String())
+}
+
 func CreateNewApiId() string {
 	apiId := fmt.Sprintf("CF-%s", ulid.Make().String())
 	return apiId

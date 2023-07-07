@@ -1,4 +1,33 @@
 definitions:
+  dtos.AllowAccessTokenDTO:
+    properties:
+      api_id:
+        minLength: 2
+        type: string
+      client_id:
+        minLength: 2
+        type: string
+      resource_method:
+        minLength: 2
+        type: string
+      resource_path:
+        minLength: 2
+        type: string
+      token:
+        minLength: 2
+        type: string
+    required:
+    - api_id
+    - client_id
+    - resource_method
+    - resource_path
+    - token
+    type: object
+  dtos.AllowAccessTokenResponseDTO:
+    properties:
+      message:
+        type: string
+    type: object
   dtos.CreateClientDTO:
     properties:
       client_name:
@@ -42,6 +71,23 @@ definitions:
       scope_id:
         type: string
       scope_name:
+        type: string
+    type: object
+  dtos.GenerateTokenDTO:
+    properties:
+      api_id:
+        minLength: 2
+        type: string
+      client_id:
+        minLength: 2
+        type: string
+    required:
+    - api_id
+    - client_id
+    type: object
+  dtos.GenerateTokenResponseDTO:
+    properties:
+      token:
         type: string
     type: object
   dtos.Permission:
@@ -92,4 +138,49 @@ paths:
       summary: Create a client with CreateClient Data input
       tags:
       - Clients
+  /v1/token/access:
+    post:
+      consumes:
+      - application/json
+      description: Allow access to a specific route
+      parameters:
+      - description: Generate Token Data
+        in: body
+        name: allowToken
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.AllowAccessTokenDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.AllowAccessTokenResponseDTO'
+      summary: Concede access to a route
+      tags:
+      - Token
+  /v1/token/generate:
+    post:
+      consumes:
+      - application/json
+      description: Generates a new JWT token to access and authorize requesting for
+        routes
+      parameters:
+      - description: Generate Token Data
+        in: body
+        name: generateToken
+        required: true
+        schema:
+          $ref: '#/definitions/dtos.GenerateTokenDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dtos.GenerateTokenResponseDTO'
+      summary: Generate a JWT token with Generate Token input
+      tags:
+      - Token
 swagger: "2.0"

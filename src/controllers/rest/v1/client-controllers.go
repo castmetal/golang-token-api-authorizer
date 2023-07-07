@@ -51,6 +51,80 @@ func CreateClientControllerV1(c *gin.Context, redisConn redis.IRedisClient, clie
 	c.IndentedJSON(http.StatusCreated, response)
 }
 
+// GenerateToken  godoc
+//
+// @Summary  Generate a JWT token with Generate Token input
+// @Description Generates a new JWT token to access and authorize requesting for routes
+// @Tags   Token
+// @Accept   json
+// @Produce  json
+// @Param   generateToken body  dtos.GenerateTokenDTO true "Generate Token Data"
+// @Success  200   {object} dtos.GenerateTokenResponseDTO
+// @Router   /v1/token/generate [post]
+func GenerateTokenControllerV1(c *gin.Context, redisConn redis.IRedisClient, clientRepository client.IClientRepository) {
+	var generateTokenDTO dtos.GenerateTokenDTO
+	if err := c.ShouldBindJSON(&generateTokenDTO); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if c.Request.Body != nil {
+		defer c.Request.Body.Close()
+	}
+
+	ucGenerateToken, err := use_cases.NewGenerateToken(clientRepository, redisConn)
+	if err != nil {
+		errMessage := common.InvalidConnectionError(err.Error())
+		common.HandleHttpErrors(errMessage, c)
+		return
+	}
+
+	response, err := ucGenerateToken.Execute(c, &generateTokenDTO)
+	if err != nil {
+		common.HandleHttpErrors(err, c)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, response)
+}
+
+// AlowAcessToken  godoc
+//
+// @Summary  Concede access to a route
+// @Description Allow access to a specific route
+// @Tags   Token
+// @Accept   json
+// @Produce  json
+// @Param   allowToken body  dtos.AllowAccessTokenDTO true "Generate Token Data"
+// @Success  200   {object} dtos.AllowAccessTokenResponseDTO
+// @Router   /v1/token/access [post]
+func AllowAccessTokenControllerV1(c *gin.Context, redisConn redis.IRedisClient, clientRepository client.IClientRepository) {
+	var allowTokenDTO dtos.AllowAccessTokenDTO
+	if err := c.ShouldBindJSON(&allowTokenDTO); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	if c.Request.Body != nil {
+		defer c.Request.Body.Close()
+	}
+
+	ucAllowAccessToken, err := use_cases.NewAllowAccessToken(clientRepository, redisConn)
+	if err != nil {
+		errMessage := common.InvalidConnectionError(err.Error())
+		common.HandleHttpErrors(errMessage, c)
+		return
+	}
+
+	response, err := ucAllowAccessToken.Execute(c, &allowTokenDTO)
+	if err != nil {
+		common.HandleHttpErrors(err, c)
+		return
+	}
+
+	c.IndentedJSON(http.StatusOK, response)
+}
+
 func SetClientControllers(routerEngine *gin.Engine, config config.EnvStruct, pgConn *pgxpool.Pool, redisConn redis.IRedisClient) {
 	clientRepository := repositories.NewClientRepository(pgConn)
 	v1 := routerEngine.Group("/v1")
@@ -61,6 +135,12 @@ func SetClientControllers(routerEngine *gin.Engine, config config.EnvStruct, pgC
 				ResourceRepository: repositories.NewResourceRepository(pgConn),
 			}
 			CreateClientControllerV1(c, redisConn, clientRepository, createClientRepositories)
+		})
+		v1.POST("/token/generate", func(c *gin.Context) {
+			GenerateTokenControllerV1(c, redisConn, clientRepository)
+		})
+		v1.POST("/token/access", func(c *gin.Context) {
+			AllowAccessTokenControllerV1(c, redisConn, clientRepository)
 		})
 	}
 

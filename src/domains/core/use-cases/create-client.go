@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"io"
 	"log"
+	"time"
 
 	"github.com/castmetal/golang-token-api-authorizer/src/domains/client"
 	"github.com/castmetal/golang-token-api-authorizer/src/domains/common"
@@ -17,6 +18,12 @@ import (
 	"github.com/google/uuid"
 )
 
+const (
+	CACHE_TYPE     = "HOUR"
+	CACHE_DURATION = 24 * 365 // 1 year
+	CACHE_KEY      = "REDIS_CLIENT_KEY"
+)
+
 type ClientRepositories struct {
 	ScopeRepository    scope.IScopeRepository
 	ResourceRepository resource.IResourceRepository
@@ -25,7 +32,7 @@ type ClientRepositories struct {
 type (
 	CreateClient interface {
 		Execute(ctx context.Context, createClientDTO *dtos.CreateClientDTO) (dtos.CreateClientResponseDTO, error)
-		toResponse(client *client.Client) dtos.CreateClientResponseDTO
+		toResponse(client *client.Client) (dtos.CreateClientResponseDTO, error)
 	}
 	CreateClientRequest struct {
 		CreateClient
@@ -105,23 +112,45 @@ func (uc *CreateClientRequest) Execute(ctx context.Context, createClientDTO *dto
 	tx.Commit(ctx)
 	needRollback = false
 
-	return uc.toResponse(clnt), nil
+	response, err = uc.toResponse(clnt)
+	if err != nil {
+		return response, common.DefaultDomainError(err.Error())
+	}
+
+	clientBytes, err := json.Marshal(clnt)
+	if err != nil {
+		return response, common.DefaultDomainError(err.Error())
+	}
+
+	var cacheDuration time.Duration
+	if CACHE_TYPE == "HOUR" {
+		cacheDuration = time.Duration(CACHE_DURATION * time.Hour)
+	} else {
+		cacheDuration = time.Duration(CACHE_DURATION * time.Minute)
+	}
+
+	hashStr := clnt.GetClientHashKey()
+	key := GetClientKey(hashStr)
+
+	_ = uc.RedisClient.SetData(ctx, key, string(clientBytes), cacheDuration)
+
+	return response, nil
 }
 
-func (uc *CreateClientRequest) toResponse(client *client.Client) dtos.CreateClientResponseDTO {
+func (uc *CreateClientRequest) toResponse(client *client.Client) (dtos.CreateClientResponseDTO, error) {
 	var response dtos.CreateClientResponseDTO
 
 	clientBytes, err := json.Marshal(client)
 	if err != nil {
-		return response
+		return dtos.CreateClientResponseDTO{}, nil
 	}
 
 	err = json.Unmarshal(clientBytes, &response)
 	if err != nil {
-		return response
+		return dtos.CreateClientResponseDTO{}, nil
 	}
 
-	return response
+	return response, nil
 }
 
 func (uc *CreateClientRequest) insertScopeAndResources(ctx context.Context, createClientDTO *dtos.CreateClientDTO, qtx *postgres.Queries) (uuid.UUID, error) {
@@ -248,4 +277,10 @@ func getScopeProps(message io.Reader) scope.ScopeProps {
 	}
 
 	return scopeProps
+}
+
+func GetClientKey(hashStr string) string {
+	keys := client.GetRedisKeys()
+
+	return keys[CACHE_KEY] + ":" + hashStr
 }
