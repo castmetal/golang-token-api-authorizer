@@ -3,7 +3,6 @@ package use_cases
 import (
 	"context"
 	"encoding/json"
-	"time"
 
 	"github.com/castmetal/golang-token-api-authorizer/src/domains/client"
 	"github.com/castmetal/golang-token-api-authorizer/src/domains/common"
@@ -82,20 +81,5 @@ func (uc *GenerateTokenRequest) Execute(ctx context.Context, generateTokenDTO *d
 }
 
 func GenerateTokenByClient(clientEntity *client.Client) (string, error) {
-	return client.GenerateTokenJWT(getTokenDuration(clientEntity), clientEntity.ID.String(), []byte(clientEntity.Salt))
-}
-
-func getTokenDuration(clientData *client.Client) time.Duration {
-	switch clientData.KeyPeriod {
-	case "days":
-		return time.Duration(clientData.KeyTimeDuration) * 24 * time.Hour
-	case "years":
-		return time.Duration(clientData.KeyTimeDuration) * 365 * 24 * time.Hour
-	case "minutes":
-		return time.Duration(clientData.KeyTimeDuration) * time.Minute
-	case "seconds":
-		return time.Duration(clientData.KeyTimeDuration) * time.Second
-	default:
-		return time.Duration(clientData.KeyTimeDuration) * 24 * time.Hour
-	}
+	return client.GenerateTokenJWT(clientEntity.KeyPeriod, clientEntity.KeyTimeDuration, clientEntity.ID.String(), []byte(clientEntity.Salt))
 }

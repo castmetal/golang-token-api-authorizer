@@ -17,6 +17,7 @@ const VALID_TOKEN_MESSAGE = "Token Valid"
 type (
 	AllowAccessToken interface {
 		Execute(ctx context.Context, allowAccessTokenDTO *dtos.AllowAccessTokenDTO) (dtos.AllowAccessTokenResponseDTO, error)
+		CheckRoutePermission(ctx context.Context, allowAccessTokenDTO *dtos.AllowAccessTokenDTO, clientData *client.Client) bool
 	}
 	AllowAccessTokenRequest struct {
 		AllowAccessToken
@@ -59,6 +60,11 @@ func (uc *AllowAccessTokenRequest) Execute(ctx context.Context, allowAccessToken
 			return response, fmt.Errorf("Invalid Token")
 		}
 
+		if !uc.CheckRoutePermission(ctx, allowAccessTokenDTO, &clientEntity) {
+			return response, common.ForbiddenError(fmt.Sprintf("ROUTE: %s %s ", allowAccessTokenDTO.ResourceMethod, allowAccessTokenDTO.ResourcePath))
+
+		}
+
 		response.Message = VALID_TOKEN_MESSAGE
 
 		return response, nil
@@ -90,4 +96,14 @@ func (uc *AllowAccessTokenRequest) Execute(ctx context.Context, allowAccessToken
 	response.Message = VALID_TOKEN_MESSAGE
 
 	return response, nil
+}
+
+func (uc *AllowAccessTokenRequest) CheckRoutePermission(ctx context.Context, allowAccessTokenDTO *dtos.AllowAccessTokenDTO, clientData *client.Client) bool {
+	for _, value := range clientData.Permissions {
+		if value.ResourceMethod == allowAccessTokenDTO.ResourceMethod && value.ResourcePath == allowAccessTokenDTO.ResourcePath {
+			return true
+		}
+	}
+
+	return false
 }

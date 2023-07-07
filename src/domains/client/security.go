@@ -7,11 +7,25 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 )
 
-func GenerateTokenJWT(tokenDuration time.Duration, clientId string, salt []byte) (string, error) {
+func GenerateTokenJWT(tokenPeriod string, tokenDuration int32, clientId string, salt []byte) (string, error) {
+	var exp int64
+	switch tokenPeriod {
+	case "days":
+		exp = time.Now().Add(time.Duration(tokenDuration*24) * time.Hour).Unix()
+	case "years":
+		exp = time.Now().Add(time.Duration(tokenDuration*365*24) * time.Hour).Unix()
+	case "minutes":
+		exp = time.Now().Add(time.Duration(tokenDuration) * time.Minute).Unix()
+	case "seconds":
+		exp = time.Now().Add(time.Duration(tokenDuration) * time.Second).Unix()
+	default:
+		exp = time.Now().Add(time.Duration(tokenDuration*24) * time.Hour).Unix()
+	}
+
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"authorized": true,
 		"clientId":   clientId,
-		"exp":        time.Now().Add(time.Minute * 2).Unix(),
+		"exp":        exp,
 	})
 
 	tokenString, err := token.SignedString(salt)

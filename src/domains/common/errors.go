@@ -16,6 +16,7 @@ const (
 	paramsErrorText       string = "Invalid Request"
 	defaultDomainError    string = "System error, try again later"
 	notFoundText          string = "%s not found"
+	forbiddenText         string = "%s is forbidden"
 	alreadyExistsText     string = "%s already exists"
 )
 
@@ -26,6 +27,7 @@ var CodeErrors map[string]string = map[string]string{
 	"INVALID_PARAMS":       "4003",
 	"NOT_FOUND":            "4004",
 	"ALREADY_EXISTS":       "4005",
+	"FORBIDDEN":            "4006",
 	"DEFAULT_DOMAIN_ERROR": "5000",
 	"INVALID_CONNECTION":   "5001",
 	"CONNECTION_CLOSED":    "5002",
@@ -112,6 +114,15 @@ func NotFoundError(name string) *ApplicationError {
 		Code:             CodeErrors["NOT_FOUND"],
 		HttpError:        http.StatusNotFound,
 		ErrorDescription: fmt.Sprintf(isNullOrEmptyText, name),
+	}
+}
+
+func ForbiddenError(name string) *ApplicationError {
+	return &ApplicationError{
+		Msg:              fmt.Sprintf(forbiddenText, name),
+		Code:             CodeErrors["FORBIDDEN"],
+		HttpError:        http.StatusNotFound,
+		ErrorDescription: fmt.Sprintf(forbiddenText, name),
 	}
 }
 
