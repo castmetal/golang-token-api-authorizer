@@ -9,17 +9,20 @@ import (
 
 func GenerateTokenJWT(tokenPeriod string, tokenDuration int32, clientId string, salt []byte) (string, error) {
 	var exp int64
+
+	now := time.Now().Local()
+
 	switch tokenPeriod {
 	case "days":
-		exp = time.Now().Add(time.Duration(tokenDuration*24) * time.Hour).Unix()
+		exp = now.AddDate(0, 0, int(tokenDuration)).Unix()
 	case "years":
-		exp = time.Now().Add(time.Duration(tokenDuration*365*24) * time.Hour).Unix()
+		exp = now.AddDate(int(tokenDuration), 0, 0).Unix()
 	case "minutes":
-		exp = time.Now().Add(time.Duration(tokenDuration) * time.Minute).Unix()
+		exp = now.Add(time.Minute * time.Duration(tokenDuration)).Unix()
 	case "seconds":
-		exp = time.Now().Add(time.Duration(tokenDuration) * time.Second).Unix()
+		exp = now.Add(time.Second * time.Duration(tokenDuration)).Unix()
 	default:
-		exp = time.Now().Add(time.Duration(tokenDuration*24) * time.Hour).Unix()
+		exp = now.Add(time.Hour * time.Duration(tokenDuration)).Unix()
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
