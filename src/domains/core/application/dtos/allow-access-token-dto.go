@@ -9,7 +9,7 @@ import (
 type (
 	AllowAccessTokenDTO struct {
 		ApiId          string `json:"api_id" validate:"required,min=2"`
-		ClientId       string `json:"client_id" validate:"required,min=2"`
+		ClientId       string `json:"client_id" validate:"uuid,required,min=2"`
 		Token          string `json:"token" validate:"required,min=2"`
 		ResourcePath   string `json:"resource_path" validate:"required,min=2"`
 		ResourceMethod string `json:"resource_method" validate:"required,min=2"`

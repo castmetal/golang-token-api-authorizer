@@ -72,7 +72,7 @@ func (q *Queries) DelClientById(ctx context.Context, clientDeletedAt sql.NullTim
 const getActiveClientByApiId = `-- name: GetActiveClientByApiId :one
 select id, client_name, scope_id, permissions, api_id, salt, key_time_duration, key_period, client_created_at, client_updated_at, client_deleted_at from client
 where 
-    api_id = $1 and id = $2 and client_deleted_at IS NOT NULL
+    api_id = $1 and id = $2 and client_deleted_at IS NULL
 `
 
 type GetActiveClientByApiIdParams struct {
@@ -102,7 +102,7 @@ func (q *Queries) GetActiveClientByApiId(ctx context.Context, arg GetActiveClien
 const getActiveClientBySaltId = `-- name: GetActiveClientBySaltId :one
 select id, client_name, scope_id, permissions, api_id, salt, key_time_duration, key_period, client_created_at, client_updated_at, client_deleted_at from client
 where 
-    salt = $1 and id = $2 and client_deleted_at IS NOT NULL
+    salt = $1 and id = $2 and client_deleted_at IS NULL
 `
 
 type GetActiveClientBySaltIdParams struct {
@@ -132,7 +132,7 @@ func (q *Queries) GetActiveClientBySaltId(ctx context.Context, arg GetActiveClie
 const getClientById = `-- name: GetClientById :one
 select id, client_name, scope_id, permissions, api_id, salt, key_time_duration, key_period, client_created_at, client_updated_at, client_deleted_at from client
 where 
-    id = $1 and client_deleted_at IS NOT NULL
+    id = $1 and client_deleted_at IS NULL
 `
 
 func (q *Queries) GetClientById(ctx context.Context, id uuid.UUID) (Client, error) {

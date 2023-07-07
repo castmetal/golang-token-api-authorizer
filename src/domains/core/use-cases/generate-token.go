@@ -9,6 +9,7 @@ import (
 	"github.com/castmetal/golang-token-api-authorizer/src/domains/common"
 	"github.com/castmetal/golang-token-api-authorizer/src/domains/core/application/dtos"
 	"github.com/castmetal/golang-token-api-authorizer/src/infra/redis"
+	"github.com/google/uuid"
 )
 
 type (
@@ -46,8 +47,7 @@ func (uc *GenerateTokenRequest) Execute(ctx context.Context, generateTokenDTO *d
 	if redisResult != "" {
 		var clientEntity = client.Client{}
 		json.Unmarshal([]byte(redisResult), &clientEntity)
-
-		token, err := client.GenerateTokenJWT(getTokenDuration(clientEntity), clientEntity.ID.String(), []byte("1234"))
+		token, err := GenerateTokenByClient(&clientEntity)
 		if err != nil {
 			return response, err
 		}
@@ -57,20 +57,45 @@ func (uc *GenerateTokenRequest) Execute(ctx context.Context, generateTokenDTO *d
 		return response, nil
 	}
 
+	id, err := uuid.Parse(generateTokenDTO.ClientId)
+	if err != nil {
+		return response, common.DefaultDomainError("client id ")
+	}
+
+	clientData, err := uc.Repository.FindOneById(ctx, id, nil)
+	if err != nil || clientData != nil && clientData.ID.String() == "" || clientData == nil {
+		return response, common.AlreadyExistsError("client id " + generateTokenDTO.ClientId)
+	}
+
+	if clientData.ApiId != generateTokenDTO.ApiId {
+		return response, common.InvalidMessageError("access denied")
+	}
+
+	token, err := GenerateTokenByClient(clientData)
+	if err != nil {
+		return response, err
+	}
+
+	response.Token = token
+
 	return response, nil
 }
 
-func getTokenDuration(clientData client.Client) time.Duration {
+func GenerateTokenByClient(clientEntity *client.Client) (string, error) {
+	return client.GenerateTokenJWT(getTokenDuration(clientEntity), clientEntity.ID.String(), []byte(clientEntity.Salt))
+}
+
+func getTokenDuration(clientData *client.Client) time.Duration {
 	switch clientData.KeyPeriod {
 	case "days":
-		return time.Duration(time.Duration(clientData.KeyTimeDuration) * 24 * time.Hour)
+		return time.Duration(clientData.KeyTimeDuration) * 24 * time.Hour
 	case "years":
-		return time.Duration(time.Duration(clientData.KeyTimeDuration) * 365 * 24 * time.Hour)
+		return time.Duration(clientData.KeyTimeDuration) * 365 * 24 * time.Hour
 	case "minutes":
-		return time.Duration(time.Duration(clientData.KeyTimeDuration) * time.Minute)
+		return time.Duration(clientData.KeyTimeDuration) * time.Minute
 	case "seconds":
-		return time.Duration(time.Duration(clientData.KeyTimeDuration) * time.Second)
+		return time.Duration(clientData.KeyTimeDuration) * time.Second
 	default:
-		return time.Duration(time.Duration(clientData.KeyTimeDuration) * 24 * time.Hour)
+		return time.Duration(clientData.KeyTimeDuration) * 24 * time.Hour
 	}
 }

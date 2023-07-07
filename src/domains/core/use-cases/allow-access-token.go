@@ -9,6 +9,7 @@ import (
 	"github.com/castmetal/golang-token-api-authorizer/src/domains/common"
 	"github.com/castmetal/golang-token-api-authorizer/src/domains/core/application/dtos"
 	"github.com/castmetal/golang-token-api-authorizer/src/infra/redis"
+	"github.com/google/uuid"
 )
 
 const VALID_TOKEN_MESSAGE = "Token Valid"
@@ -49,7 +50,7 @@ func (uc *AllowAccessTokenRequest) Execute(ctx context.Context, allowAccessToken
 		var clientEntity = client.Client{}
 		json.Unmarshal([]byte(redisResult), &clientEntity)
 
-		valid, err := client.ValidateTokenJWT(allowAccessTokenDTO.Token, []byte(clientEntity.Salt))
+		valid, err := client.ValidateTokenJWT(allowAccessTokenDTO.Token, allowAccessTokenDTO.ClientId, []byte(clientEntity.Salt))
 		if err != nil {
 			return response, err
 		}
@@ -62,6 +63,31 @@ func (uc *AllowAccessTokenRequest) Execute(ctx context.Context, allowAccessToken
 
 		return response, nil
 	}
+
+	id, err := uuid.Parse(allowAccessTokenDTO.ClientId)
+	if err != nil {
+		return response, common.DefaultDomainError("client id ")
+	}
+
+	clientData, err := uc.Repository.FindOneById(ctx, id, nil)
+	if err != nil || clientData != nil && clientData.ID.String() == "" || clientData == nil {
+		return response, common.AlreadyExistsError("client id " + allowAccessTokenDTO.ClientId)
+	}
+
+	if clientData.ApiId != allowAccessTokenDTO.ApiId {
+		return response, common.InvalidMessageError("access denied")
+	}
+
+	valid, err := client.ValidateTokenJWT(allowAccessTokenDTO.Token, allowAccessTokenDTO.ClientId, []byte(clientData.Salt))
+	if err != nil {
+		return response, err
+	}
+
+	if !valid {
+		return response, fmt.Errorf("Invalid Token")
+	}
+
+	response.Message = VALID_TOKEN_MESSAGE
 
 	return response, nil
 }

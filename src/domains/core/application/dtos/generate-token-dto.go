@@ -9,7 +9,7 @@ import (
 type (
 	GenerateTokenDTO struct {
 		ApiId    string `json:"api_id" validate:"required,min=2"`
-		ClientId string `json:"client_id" validate:"required,min=2"`
+		ClientId string `json:"client_id" validate:"uuid,required,min=2"`
 	}
 )
 

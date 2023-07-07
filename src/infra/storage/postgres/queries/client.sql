@@ -20,17 +20,17 @@ where
 -- name: GetActiveClientByApiId :one
 select * from client
 where 
-    api_id = $1 and id = $2 and client_deleted_at IS NOT NULL;
+    api_id = $1 and id = $2 and client_deleted_at IS NULL;
 
 -- name: GetActiveClientBySaltId :one
 select * from client
 where 
-    salt = $1 and id = $2 and client_deleted_at IS NOT NULL;
+    salt = $1 and id = $2 and client_deleted_at IS NULL;
 
 -- name: GetClientById :one
 select * from client
 where 
-    id = $1 and client_deleted_at IS NOT NULL;
+    id = $1 and client_deleted_at IS NULL;
 
 -- name: DelClientById :exec
 delete from client
