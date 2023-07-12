@@ -121,7 +121,7 @@ func ForbiddenError(name string) *ApplicationError {
 	return &ApplicationError{
 		Msg:              fmt.Sprintf(forbiddenText, name),
 		Code:             CodeErrors["FORBIDDEN"],
-		HttpError:        http.StatusNotFound,
+		HttpError:        http.StatusForbidden,
 		ErrorDescription: fmt.Sprintf(forbiddenText, name),
 	}
 }
