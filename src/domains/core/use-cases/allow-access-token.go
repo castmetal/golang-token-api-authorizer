@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
 	"github.com/castmetal/golang-token-api-authorizer/src/domains/client"
 	"github.com/castmetal/golang-token-api-authorizer/src/domains/common"
@@ -101,6 +102,15 @@ func (uc *AllowAccessTokenRequest) Execute(ctx context.Context, allowAccessToken
 func (uc *AllowAccessTokenRequest) CheckRoutePermission(ctx context.Context, allowAccessTokenDTO *dtos.AllowAccessTokenDTO, clientData *client.Client) bool {
 	for _, value := range clientData.Permissions {
 		if value.ResourceMethod == allowAccessTokenDTO.ResourceMethod && value.ResourcePath == allowAccessTokenDTO.ResourcePath {
+			return true
+		}
+
+		if !strings.Contains(value.ResourcePath, ":id") {
+			continue
+		}
+
+		newPath := strings.Split(value.ResourcePath, ":id")
+		if value.ResourceMethod == allowAccessTokenDTO.ResourceMethod && strings.Contains(allowAccessTokenDTO.ResourcePath, newPath[0]) {
 			return true
 		}
 	}
