@@ -67,7 +67,7 @@ func InvalidMessageError(name string) *ApplicationError {
 	return &ApplicationError{
 		Msg:              fmt.Sprintf(invalidMessageText, name),
 		Code:             CodeErrors["INVALID_MESSAGE"],
-		HttpError:        http.StatusNotAcceptable,
+		HttpError:        http.StatusUnauthorized,
 		ErrorDescription: fmt.Sprintf(isNullOrEmptyText, name),
 	}
 }

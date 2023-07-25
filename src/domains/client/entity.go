@@ -7,7 +7,6 @@ import (
 
 	"github.com/castmetal/golang-token-api-authorizer/src/domains/common"
 	"github.com/google/uuid"
-	"github.com/oklog/ulid/v2"
 )
 
 const SALT_DEFAULT_SIZE = 128 // 128 bits security
@@ -106,7 +105,9 @@ func (c *Client) GetClientHashKey() string {
 }
 
 func CreateNewApiId() string {
-	apiId := fmt.Sprintf("CF-%s", ulid.Make().String())
+	newUlid := GetNewUlid()
+
+	apiId := fmt.Sprintf("CF-%s", newUlid.String())
 	return apiId
 }
 
@@ -119,5 +120,7 @@ func CreateNewSalt(saltSize int) string {
 		salt[i] = letters[rand.Intn(len(letters))]
 	}
 
-	return fmt.Sprintf("%s-@;!.-%s", string(salt), ulid.Make().String())
+	newUlid := GetNewUlid()
+
+	return fmt.Sprintf("%s-@;!.-%s", string(salt), newUlid.String())
 }

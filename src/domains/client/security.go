@@ -2,9 +2,11 @@ package client
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/oklog/ulid/v2"
 )
 
 func GenerateTokenJWT(tokenPeriod string, tokenDuration int32, clientId string, salt []byte) (string, error) {
@@ -58,4 +60,16 @@ func ValidateTokenJWT(tokenStr string, clientId string, salt []byte) (bool, erro
 	}
 
 	return true, nil
+}
+
+func GetNewUlid() ulid.ULID {
+	entropy := rand.New(rand.NewSource(time.Now().UnixNano()))
+	ms := ulid.Timestamp(time.Now())
+
+	newUlid, err := ulid.New(ms, entropy)
+	if err != nil {
+		newUlid = ulid.Make()
+	}
+
+	return newUlid
 }
